@@ -1,0 +1,30 @@
+{
+    "name": "n2n/n2n-composer-skeleton-installer",
+    "type": "composer-plugin",
+    "description": "n2n skeleton installer plugin for composer",
+    "keywords": ["n2n", "skeleton", "installer"],
+    "homepage": "http://n2n.rocks/",
+    "license": "GNU LGPL",
+    "authors": [
+        {
+            "name": "Andreas von Burg",
+            "email": "a@von-burg.net",
+            "homepage": "http://www.von-burg.net",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "composer-plugin-api": "^1.0"
+    },
+    "require-dev": {
+        "composer/composer": "1.*"
+    },
+    "extra": {
+        "class": "n2n\\composer\\skeleton\\SkeletonPlugin"
+    },
+    "autoload": {
+	    "psr-4": {
+	      	"n2n\\composer\\": "src/n2n/composer"
+	    }
+	}
+}
