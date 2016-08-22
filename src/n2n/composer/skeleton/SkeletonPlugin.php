@@ -61,76 +61,59 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 			throw new \InvalidArgumentException('Invalid extra def for n2n/n2n-composer-skeleton-installer');
 		}
 		
-		$packageDefs = array();
-		foreach ($extra['n2n/n2n-composer-skeleton-installer']['optional'] as $name => $version) {
-			$packageDefs[] = new PackageDef($name, $version);
-		}
-		return $packageDefs;
+		return $extra['n2n/n2n-composer-skeleton-installer']['optional'];
 	}
 	
 	private function installOptionalPackages() {
-		
 		$requiredLinks = array();
 		$additonalRequires = array();
-		foreach ($this->getOptionalPackageDefs() as $packageDef) {
-			$requiredLinks[$packageDef->getName()] = new Link('__root__', $packageDef->getName(),
-					$this->versionParser->parseConstraints($packageDef->getVersion()), 'INST: ' . $packageDef->getName(),
-					$packageDef->getVersion());
-			$additonalRequires[$packageDef->getName()] = $packageDef->getVersion(); 
+		foreach ($this->getOptionalPackageDefs() as $name => $version) {
+			if (!$this->io->askConfirmation('Do you want to install ' . $name . '? [y,n] (default: y): ', true)) {
+				continue;
+			}
 			
-			$this->io->write('Stuff: ' . $packageDef->getName());
+			$requiredLinks[$name] = new Link('__root__', $name, $this->versionParser->parseConstraints($version), 
+					$name, $version);
+			$additonalRequires[$name] = version;
 		}
 		
 		if (empty($requiredLinks)) return;
 		
 		$this->composer->getPackage()->setRequires($requiredLinks);
 		
+		$this->install(array_keys($requiredLinks));
+		
+		$this->updateJson($additonalRequires);
+	}
+	
+	private function install(array $packageNames) {
+		$installer = new Installer($this->io, $this->composer->getConfig(), $this->composer->getPackage(),
+				$this->composer->getDownloadManager(), $this->composer->getRepositoryManager(),
+				$this->composer->getLocker(), $this->composer->getInstallationManager(),
+				new EventDispatcher($this->composer, $this->io), $this->composer->getAutoloadGenerator());
 		
 		$installer = $this->createInstaller();
 		$installer->disablePlugins();
 		$installer->setUpdate();
-		$installer->setUpdateWhitelist(array_keys($requiredLinks));
+		$installer->setUpdateWhitelist($packageNames);
 		
 		if (0 !== $installer->run()) {
 			$this->io->writeError('Failed to install additional packages.');
 		}
-		
-		$composerJsonFile = new JsonFile(Factory::getComposerFile());
-		
-		$jsonData = $composerJsonFile->read();
-
-		unset($jsonData['extra']['n2n/n2n-composer-skeleton-installer']);
-		unset($jsonData['require']['n2n/n2n-composer-skeleton-installer']);
-		
-		if (!isset($jsonData['require'])) {
-			$jsonData['require'] = array();
-		}
-		$jsonData['require'] = array_merge($jsonData['require'], $additonalRequires);
-		$composerJsonFile->write($jsonData);
-	}
-	
-	private function createInstaller() {
-        return new Installer($this->io, $this->composer->getConfig(), $this->composer->getPackage(), 
-        		$this->composer->getDownloadManager(), $this->composer->getRepositoryManager(),
-            	$this->composer->getLocker(), $this->composer->getInstallationManager(),
-            	new EventDispatcher($this->composer, $this->io), $this->composer->getAutoloadGenerator());
     }
-}
-
-class PackageDef {
-	private $name;
-	private $version;
-	
-	public function __construct($name, $version) {
-		$this->name = $name;
-		$this->version = $version;
-	}
-	
-	public function getName() {
-		return $this->name;
-	}
-	
-	public function getVersion() {
-		return $this->version;
-	}
+    
+    private function updateJson(array $additonalRequires) {
+    	$composerJsonFile = new JsonFile(Factory::getComposerFile());
+    	
+    	$jsonData = $composerJsonFile->read();
+    	
+    	unset($jsonData['extra']['n2n/n2n-composer-skeleton-installer']);
+    	
+    	if (!isset($jsonData['require'])) {
+    		$jsonData['require'] = array();
+    	}
+    	unset($jsonData['require']['n2n/n2n-composer-skeleton-installer']);
+    	$jsonData['require'] = array_merge($jsonData['require'], $additonalRequires);
+    	$composerJsonFile->write($jsonData);
+    }
 }
