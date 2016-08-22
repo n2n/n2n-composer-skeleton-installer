@@ -7,7 +7,6 @@ use Composer\IO\IOInterface;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Script\Event;
 use Composer\EventDispatcher\EventDispatcher;
-use Composer\Package\PackageInterface;
 use Composer\Installer;
 use Composer\Package\Version\VersionParser;
 use Composer\Factory;
