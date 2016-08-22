@@ -12,6 +12,7 @@ use Composer\Installer;
 use Composer\Package\Version\VersionParser;
 use Composer\Factory;
 use Composer\Json\JsonFile;
+use Composer\Package\Link;
 
 class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	private $composer;
@@ -36,6 +37,8 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	 */
 	public function postInstall(Event $event) {
 		echo 'POST INSTALL HOLERADIO';
+		
+		$this->installOptionalPackages();
 	}
 	
 	/**
@@ -53,6 +56,8 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 		$rootPackage = $this->composer->getPackage();
 		$extra = $rootPackage->getExtra();
 		
+		var_dump($extra);
+		
 		if (!isset($extra['n2n/n2n-composer-skeleton-installer']['optional'])) return; 
 		
 		if (!is_array($extra['n2n/n2n-composer-skeleton-installer']['optional'])) {
@@ -67,7 +72,6 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	}
 	
 	private function installOptionalPackages() {
-		
 		$rootPackage = $this->composer->getPackage();
 		
 		$requireLinks = array();
