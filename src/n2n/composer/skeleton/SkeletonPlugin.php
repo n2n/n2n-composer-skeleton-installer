@@ -100,7 +100,7 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 		$jsonData = $composerJsonFile->read();
 
 		unset($jsonData['extra']['n2n/n2n-composer-skeleton-installer']);
-		unset($jsonData['requires']['n2n/n2n-composer-skeleton-installer']);
+		unset($jsonData['require']['n2n/n2n-composer-skeleton-installer']);
 		
 		if (!isset($jsonData['require'])) {
 			$jsonData['require'] = array();
