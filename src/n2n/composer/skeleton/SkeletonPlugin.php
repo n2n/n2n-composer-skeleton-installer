@@ -92,7 +92,6 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 				$this->composer->getLocker(), $this->composer->getInstallationManager(),
 				new EventDispatcher($this->composer, $this->io), $this->composer->getAutoloadGenerator());
 		
-		$installer = $this->createInstaller();
 		$installer->disablePlugins();
 		$installer->setUpdate();
 		$installer->setUpdateWhitelist($packageNames);
