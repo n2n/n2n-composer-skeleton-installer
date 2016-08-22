@@ -35,7 +35,7 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	 * @param ScriptEvent $event
 	 */
 	public function postInstall(Event $event) {
-		echo 'POST INSTALL HOLERADIO';
+		echo 'POST INSTALL HOLERADIO ' . spl_object_hash($this);
 		
 		$this->installOptionalPackages();
 	}
@@ -46,7 +46,7 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	 * @param ScriptEvent $event
 	 */
 	public function postUpdate(Event $event) {
-		echo 'POST UPDATE HOLERADIO';
+		echo 'POST UPDATE HOLERADIO ' . spl_object_hash($this);
 		
 		$this->installOptionalPackages();
 	}
@@ -55,9 +55,7 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 		$rootPackage = $this->composer->getPackage();
 		$extra = $rootPackage->getExtra();
 		
-		var_dump($extra);
-		
-		if (!isset($extra['n2n/n2n-composer-skeleton-installer']['optional'])) return; 
+		if (!isset($extra['n2n/n2n-composer-skeleton-installer']['optional'])) return array(); 
 		
 		if (!is_array($extra['n2n/n2n-composer-skeleton-installer']['optional'])) {
 			throw new \InvalidArgumentException('Invalid extra def for n2n/n2n-composer-skeleton-installer');
@@ -71,25 +69,27 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	}
 	
 	private function installOptionalPackages() {
-		$rootPackage = $this->composer->getPackage();
 		
-		$requireLinks = array();
+		$requiredLinks = array();
 		$additonalRequires = array();
 		foreach ($this->getOptionalPackageDefs() as $packageDef) {
-			$requireLinks[$packageDef->getName()] = new Link('__root__', $packageDef->getName(),
+			$requiredLinks[$packageDef->getName()] = new Link('__root__', $packageDef->getName(),
 					$this->versionParser->parseConstraints($packageDef->getVersion()), 'INST: ' . $packageDef->getName(),
 					$packageDef->getVersion());
 			$additonalRequires[$packageDef->getName()] = $packageDef->getVersion(); 
 			
 			$this->io->write('Stuff: ' . $packageDef->getName());
 		}
-		$rootPackage->setRequires($requireLinks);
+		
+		if (empty($requiredLinks)) return;
+		
+		$this->composer->getPackage()->setRequires($requiredLinks);
 		
 		
 		$installer = $this->createInstaller();
 		$installer->disablePlugins();
 		$installer->setUpdate();
-		$installer->setUpdateWhitelist(array_keys($requireLinks));
+		$installer->setUpdateWhitelist(array_keys($requiredLinks));
 		
 		if (0 !== $installer->run()) {
 			$this->io->writeError('Failed to install additional packages.');
@@ -100,11 +100,12 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 		$jsonData = $composerJsonFile->read();
 
 		unset($jsonData['extra']['n2n/n2n-composer-skeleton-installer']);
+		unset($jsonData['requires']['n2n/n2n-composer-skeleton-installer']);
 		
-		if (!isset($jsonData['requires'])) {
-			$jsonData['requires'] = array();
+		if (!isset($jsonData['require'])) {
+			$jsonData['require'] = array();
 		}
-		$jsonData['requires'] = array_merge($jsonData['requires'], $additonalRequires);
+		$jsonData['require'] = array_merge($jsonData['require'], $additonalRequires);
 		$composerJsonFile->write($jsonData);
 	}
 	
