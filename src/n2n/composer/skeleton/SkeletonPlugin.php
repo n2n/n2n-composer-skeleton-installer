@@ -35,8 +35,6 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	 * @param ScriptEvent $event
 	 */
 	public function postInstall(Event $event) {
-		echo 'POST INSTALL HOLERADIO ' . spl_object_hash($this);
-		
 		$this->installOptionalPackages();
 	}
 	
@@ -46,8 +44,6 @@ class SkeletonPlugin implements PluginInterface, EventSubscriberInterface {
 	 * @param ScriptEvent $event
 	 */
 	public function postUpdate(Event $event) {
-		echo 'POST UPDATE HOLERADIO ' . spl_object_hash($this);
-		
 		$this->installOptionalPackages();
 	}
 	
