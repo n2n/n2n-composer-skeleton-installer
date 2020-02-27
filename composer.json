@@ -2,7 +2,11 @@
     "name": "n2n/n2n-composer-skeleton-installer",
     "type": "composer-plugin",
     "description": "n2n skeleton installer plugin for composer",
-    "keywords": ["n2n", "skeleton", "installer"],
+    "keywords": [
+        "n2n",
+        "skeleton",
+        "installer"
+    ],
     "homepage": "http://n2n.rocks/",
     "license": "GNU LGPL",
     "authors": [
@@ -23,8 +27,8 @@
         "class": "n2n\\composer\\skeleton\\SkeletonPlugin"
     },
     "autoload": {
-	    "psr-4": {
-	      	"n2n\\composer\\skeleton\\": "src/n2n/composer/skeleton"
-	    }
-	}
+        "psr-4": {
+            "n2n\\composer\\skeleton\\": "src/n2n/composer/skeleton"
+        }
+    }
 }
